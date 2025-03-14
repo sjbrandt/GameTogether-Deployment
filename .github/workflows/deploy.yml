@@ -1,0 +1,29 @@
+name: Deploy with Docker Compose
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual deployment
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy on Remote Server
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ vars.HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_PKEY }}
+          script: |
+            cd ~/GameTogether-Deployment
+            git pull origin main
+            docker-compose pull
+            docker-compose up -d --force-recreate
